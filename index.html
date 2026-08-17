@@ -1051,13 +1051,15 @@
     async function loadConfig() {
       if (!GAS_WEB_APP_URL) return;
       try {
-        const res = await fetch(GAS_WEB_APP_URL + "?action=getConfig&source=" + encodeURIComponent(ORDER_SOURCE));
+        const res = await fetch(
+          GAS_WEB_APP_URL + "?action=getConfig&source=" + encodeURIComponent(ORDER_SOURCE),
+          { method: "GET", redirect: "follow", cache: "no-store" }
+        );
         const data = await res.json();
         if (data && data.ok) {
           if (data.price > 0) unitPrice = Number(data.price);
           if (data.originalPrice > 0) originalPrice = Number(data.originalPrice);
           if (data.productName) productName = String(data.productName);
-          // Always show 36% offer relative to the live sale price
           syncPriceUI();
         }
       } catch (err) {
@@ -1065,27 +1067,71 @@
       }
     }
 
+    function buildOrderQuery(payload) {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach((key) => {
+        const val = payload[key];
+        if (val === undefined || val === null) return;
+        params.set(key, String(val));
+      });
+      return params.toString();
+    }
+
+    async function parseGasResponse(res) {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error("رد غير متوقع من السيرفر. تأكد أن الرابط صحيح ومنشور كـ Anyone.");
+      }
+    }
+
+    function gasNetworkHint(err) {
+      const msg = String((err && err.message) || err || "");
+      if (location.protocol === "file:") {
+        return "لا يمكن إرسال الطلب من ملف محلي. ارفع الصفحة على GitHub Pages أو افتحها عبر http://localhost ثم أعد المحاولة.";
+      }
+      if (/failed to fetch|networkerror|load failed|network request failed/i.test(msg)) {
+        return "تعذر الاتصال بالخادم (Failed to fetch). تحقق من الإنترنت، وأن نشر Apps Script على Anyone، وأنك لا تستخدم مانع إعلانات على script.google.com.";
+      }
+      return msg || "فشل الاتصال بالخادم.";
+    }
+
     async function submitOrder(payload) {
       if (!GAS_WEB_APP_URL) {
         throw new Error("أضف رابط Apps Script (GAS_WEB_APP_URL) داخل الصفحة أولًا.");
       }
-
-      // text/plain avoids CORS preflight; Apps Script parseRequest_ reads JSON body
-      const res = await fetch(GAS_WEB_APP_URL, {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-      });
-
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (err) {
-        throw new Error("رد غير متوقع من السيرفر. تأكد أن الرابط صحيح ومنشور كـ Anyone.");
+      if (location.protocol === "file:") {
+        throw new Error(gasNetworkHint({ message: "Failed to fetch" }));
       }
-      return data;
+
+      // 1) GET first — Apps Script doGet already accepts name+phone orders and
+      //    avoids the common POST→redirect CORS "Failed to fetch" issue.
+      try {
+        const qs = buildOrderQuery(payload);
+        const resGet = await fetch(GAS_WEB_APP_URL + "?" + qs, {
+          method: "GET",
+          redirect: "follow",
+          cache: "no-store",
+        });
+        return await parseGasResponse(resGet);
+      } catch (getErr) {
+        console.warn("GET order failed, trying POST…", getErr);
+      }
+
+      // 2) POST fallback (text/plain = no CORS preflight)
+      try {
+        const resPost = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          redirect: "follow",
+          cache: "no-store",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+        });
+        return await parseGasResponse(resPost);
+      } catch (postErr) {
+        throw new Error(gasNetworkHint(postErr));
+      }
     }
 
     // Menu
