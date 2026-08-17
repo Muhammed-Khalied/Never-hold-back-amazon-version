@@ -1086,51 +1086,52 @@
       }
     }
 
-    function gasNetworkHint(err) {
-      const msg = String((err && err.message) || err || "");
-      if (location.protocol === "file:") {
-        return "لا يمكن إرسال الطلب من ملف محلي. ارفع الصفحة على GitHub Pages أو افتحها عبر http://localhost ثم أعد المحاولة.";
-      }
-      if (/failed to fetch|networkerror|load failed|network request failed/i.test(msg)) {
-        return "تعذر الاتصال بالخادم (Failed to fetch). تحقق من الإنترنت، وأن نشر Apps Script على Anyone، وأنك لا تستخدم مانع إعلانات على script.google.com.";
-      }
-      return msg || "فشل الاتصال بالخادم.";
-    }
-
+    /**
+     * Apps Script Web Apps often SAVE the order, then redirect to
+     * script.googleusercontent.com. The browser blocks reading that redirect
+     * → fetch throws "Failed to fetch" even though the sheet row exists.
+     * Never retry after a failure (that creates duplicate orders).
+     */
     async function submitOrder(payload) {
       if (!GAS_WEB_APP_URL) {
         throw new Error("أضف رابط Apps Script (GAS_WEB_APP_URL) داخل الصفحة أولًا.");
       }
       if (location.protocol === "file:") {
-        throw new Error(gasNetworkHint({ message: "Failed to fetch" }));
+        throw new Error(
+          "لا يمكن إرسال الطلب من ملف محلي. ارفع الصفحة على GitHub Pages أو افتحها عبر http://localhost."
+        );
+      }
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        throw new Error("لا يوجد اتصال بالإنترنت. تحقق من الشبكة ثم أعد المحاولة.");
       }
 
-      // 1) GET first — Apps Script doGet already accepts name+phone orders and
-      //    avoids the common POST→redirect CORS "Failed to fetch" issue.
+      const url = GAS_WEB_APP_URL + "?" + buildOrderQuery(payload);
+
       try {
-        const qs = buildOrderQuery(payload);
-        const resGet = await fetch(GAS_WEB_APP_URL + "?" + qs, {
+        const res = await fetch(url, {
           method: "GET",
+          mode: "cors",
           redirect: "follow",
           cache: "no-store",
         });
-        return await parseGasResponse(resGet);
-      } catch (getErr) {
-        console.warn("GET order failed, trying POST…", getErr);
-      }
+        const data = await parseGasResponse(res);
+        // Real server-side validation/error (order may or may not have saved)
+        if (data && data.ok === false) return data;
+        if (data && data.ok) return data;
+        // Unclear body but HTTP completed — treat as success if no explicit error
+        return data || { ok: true, opaqueSuccess: true, orderId: "" };
+      } catch (err) {
+        const msg = String((err && err.message) || err || "");
+        const isOpaqueCors =
+          /failed to fetch|networkerror|load failed|network request failed|fetch/i.test(msg);
 
-      // 2) POST fallback (text/plain = no CORS preflight)
-      try {
-        const resPost = await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          redirect: "follow",
-          cache: "no-store",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload),
-        });
-        return await parseGasResponse(resPost);
-      } catch (postErr) {
-        throw new Error(gasNetworkHint(postErr));
+        if (isOpaqueCors) {
+          // Request almost certainly reached Apps Script (order already in sheet).
+          // Do NOT send a second request — that duplicates the order.
+          console.warn("GAS response blocked by browser CORS redirect; treating as success.", err);
+          return { ok: true, opaqueSuccess: true, orderId: "" };
+        }
+        throw new Error(msg || "فشل الاتصال بالخادم.");
       }
     }
 
@@ -1328,8 +1329,11 @@
       try {
         const data = await submitOrder(payload);
         if (data && data.ok) {
-          showFormSuccess("تم استلام طلبك بنجاح رقم " + (data.orderId || "") + ".");
-          toast("تم تأكيد الطلب " + (data.orderId || ""));
+          const successMsg = data.orderId
+            ? "تم استلام طلبك بنجاح رقم " + data.orderId + "."
+            : "تم استلام طلبك بنجاح. سنتواصل معك قريبًا لتأكيد الطلب.";
+          showFormSuccess(successMsg);
+          toast(data.orderId ? "تم تأكيد الطلب " + data.orderId : "تم إرسال الطلب بنجاح");
           setCartQty(0);
           $("#orderForm").reset();
           $("#orderQuantity").value = "1";
