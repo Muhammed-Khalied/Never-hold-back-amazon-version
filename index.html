@@ -803,7 +803,21 @@
         <input type="hidden" id="orderProduct" name="product" value="Never Hold Back Gel" />
         <input type="hidden" id="orderQuantity" name="quantity" value="1" />
 
-        <p class="text-xs text-[#565959]">الدفع عند الاستلام · السعر: <span class="js-price">230.00</span> ج.م · موعد التوصيل حسب المحافظة</p>
+        <div id="orderTotals" class="rounded-lg border border-border bg-buybox p-3 text-sm space-y-2">
+          <div class="flex justify-between gap-2">
+            <span>سعر المنتج</span>
+            <span class="shrink-0"><span id="orderSubtotal">0.00</span> ج.م</span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span>الشحن</span>
+            <span id="orderShippingLabel" class="shrink-0 text-[#565959]">اختر المحافظة</span>
+          </div>
+          <div class="flex justify-between gap-2 font-bold text-base border-t border-border pt-2">
+            <span>السعر الإجمالي</span>
+            <span class="text-price shrink-0"><span id="orderGrandTotal">0.00</span> ج.م</span>
+          </div>
+          <p class="text-xs text-[#565959] font-normal">الدفع عند الاستلام · الإجمالي = سعر المنتج × الكمية + شحن المحافظة</p>
+        </div>
 
         <div id="formError" class="form-msg rounded-lg bg-red-50 text-price text-sm px-3 py-2 border border-red-200"></div>
         <div id="formSuccess" class="form-msg rounded-lg bg-green-50 text-stock text-sm px-3 py-2 border border-green-200"></div>
@@ -834,15 +848,17 @@
 
   <script>
     /**
-     * LINK TO EXISTING code.gs (shared with your other site — do NOT edit code.gs).
+     * LINK TO EXISTING code.gs (shared with your other site).
      *
      * 1. Sheet → Extensions → Apps Script → Deploy → Manage deployments
      * 2. Copy the Web App URL that already ends with /exec
      *    (Execute as: Me · Who has access: Anyone)
      * 3. Paste it between the quotes below, then hard-refresh this page
-     * 4. Smoke test: open YOUR_URL?action=getConfig — expect ok:true + price
+     * 4. Smoke test: open YOUR_URL?action=getConfig&source=amazon-pdp
+     *    — expect ok:true + price + shipping { المحافظة: fee }
      *
      * Orders POST JSON (text/plain) to the same /exec endpoint as the other site.
+     * السعر الإجمالي = unitPrice × quantity + governorate shipping (server-authoritative).
      */
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyv42Ob87yf648qZcA4F2vOjxIVltVNnJjQNyEKPclaHRS5Nm9r53cOe5GWU3BOu0odRw/exec";
     /** Sheet notes tag so amazon-pdp orders are distinguishable from the other site. */
@@ -873,6 +889,34 @@
     let originalPrice = 359.38; // 230 after 36% off
     const DISCOUNT_PERCENT = 36;
     let productName = "Never Hold Back Gel";
+
+    /** Same zone fallbacks as code.gs CONFIG (used until getConfig loads). */
+    const SHIPPING_CAIRO = 35;
+    const SHIPPING_ALEX = 45;
+    const SHIPPING_NEAR = 55;
+    const SHIPPING_FAR = 70;
+    const SHIPPING_CAIRO_GOVS = { "القاهرة": 1, "الجيزة": 1, "القليوبية": 1 };
+    const SHIPPING_ALEX_GOVS = { "الإسكندرية": 1 };
+    const SHIPPING_FAR_GOVS = {
+      "البحر الأحمر": 1, "الوادي الجديد": 1, "مطروح": 1,
+      "جنوب سيناء": 1, "شمال سيناء": 1, "أسوان": 1,
+    };
+    let shippingByGov = {};
+
+    function fallbackShippingFee(gov) {
+      if (!gov) return 0;
+      if (SHIPPING_CAIRO_GOVS[gov]) return SHIPPING_CAIRO;
+      if (SHIPPING_ALEX_GOVS[gov]) return SHIPPING_ALEX;
+      if (SHIPPING_FAR_GOVS[gov]) return SHIPPING_FAR;
+      return SHIPPING_NEAR;
+    }
+
+    function getShippingFee(gov) {
+      if (!gov) return 0;
+      const fromConfig = Number(shippingByGov[gov]);
+      if (!isNaN(fromConfig) && fromConfig > 0) return fromConfig;
+      return fallbackShippingFee(gov);
+    }
 
     function getSelectedProductQty() {
       return Math.max(
@@ -954,6 +998,7 @@
       const gov = $("#orderGovernorate").value.trim();
       const time = DELIVERY_BY_GOV[gov];
       const el = $("#deliveryEstimate");
+      const fee = gov ? getShippingFee(gov) : 0;
       const label = time
         ? time
         : "اختر المحافظة لمعرفة موعد التوصيل";
@@ -963,12 +1008,16 @@
       });
 
       if (gov && time) {
-        el.textContent = "وقت التوصيل المتوقع: " + time;
+        el.textContent = "وقت التوصيل المتوقع: " + time + " · الشحن: " + formatMoney(fee) + " ج.م";
+        el.classList.remove("hidden");
+      } else if (gov) {
+        el.textContent = "الشحن: " + formatMoney(fee) + " ج.م";
         el.classList.remove("hidden");
       } else {
         el.textContent = "";
         el.classList.add("hidden");
       }
+      updateOrderTotals();
     }
 
     const $ = (sel) => document.querySelector(sel);
@@ -988,6 +1037,30 @@
       updateCartUI();
     }
 
+    function updateOrderTotals() {
+      const qty = Math.max(cartQty, 0);
+      const gov = $("#orderGovernorate") ? $("#orderGovernorate").value.trim() : "";
+      const subtotal = unitPrice * qty;
+      const shippingFee = gov ? getShippingFee(gov) : 0;
+      const shipping = qty > 0 ? shippingFee : 0;
+      const total = subtotal + shipping;
+
+      const subEl = $("#orderSubtotal");
+      const shipEl = $("#orderShippingLabel");
+      const totalEl = $("#orderGrandTotal");
+      if (subEl) subEl.textContent = formatMoney(subtotal);
+      if (shipEl) {
+        if (!gov) {
+          shipEl.textContent = "اختر المحافظة";
+          shipEl.classList.add("text-[#565959]");
+        } else {
+          shipEl.textContent = formatMoney(shippingFee) + " ج.م";
+          shipEl.classList.remove("text-[#565959]");
+        }
+      }
+      if (totalEl) totalEl.textContent = formatMoney(total);
+    }
+
     function updateCartUI() {
       $("#cartBadge").textContent = String(cartQty);
       $$(".cart-badge-mobile").forEach((el) => (el.textContent = String(cartQty)));
@@ -997,6 +1070,7 @@
       $("#submitOrder").disabled = cartQty < 1;
       const stockQty = cartQty > 0 ? cartQty : getSelectedProductQty();
       updateStockUI(stockQty);
+      updateOrderTotals();
     }
 
     function addToCart(qty) {
@@ -1065,7 +1139,11 @@
           if (data.price > 0) unitPrice = Number(data.price);
           if (data.originalPrice > 0) originalPrice = Number(data.originalPrice);
           if (data.productName) productName = String(data.productName);
+          if (data.shipping && typeof data.shipping === "object") {
+            shippingByGov = data.shipping;
+          }
           syncPriceUI();
+          updateDeliveryEstimate();
         }
       } catch (err) {
         console.warn("getConfig failed — using local price", err);
@@ -1334,9 +1412,13 @@
       try {
         const data = await submitOrder(payload);
         if (data && data.ok) {
+          const charged = Number(data.total);
+          const totalNote = !isNaN(charged) && charged > 0
+            ? " السعر الإجمالي " + formatMoney(charged) + " ج.م (يشمل الشحن)."
+            : "";
           const successMsg = data.orderId
-            ? "تم استلام طلبك بنجاح رقم " + data.orderId + "."
-            : "تم استلام طلبك بنجاح. سنتواصل معك قريبًا لتأكيد الطلب.";
+            ? "تم استلام طلبك بنجاح رقم " + data.orderId + "." + totalNote
+            : "تم استلام طلبك بنجاح. سنتواصل معك قريبًا لتأكيد الطلب." + totalNote;
           showFormSuccess(successMsg);
           toast(data.orderId ? "تم تأكيد الطلب " + data.orderId : "تم إرسال الطلب بنجاح");
           setCartQty(0);
