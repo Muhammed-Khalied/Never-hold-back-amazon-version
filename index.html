@@ -30,7 +30,7 @@
   <meta property="og:description" content="جل موضعي مرخص في مصر. استخدام سهل مع شحن محلي والدفع عند الاستلام." />
   <meta property="og:url" content="https://amazon-eg-sigma.vercel.app/" />
   <meta property="og:image" content="https://amazon-eg-sigma.vercel.app/IMG-20260717-WA0009.png" />
-  <meta property="product:price:amount" content="299" />
+  <meta property="product:price:amount" content="400" />
   <meta property="product:price:currency" content="EGP" />
 
   <meta name="twitter:card" content="summary_large_image" />
@@ -71,11 +71,16 @@
           "@type": "Offer",
           "url": "https://amazon-eg-sigma.vercel.app/",
           "priceCurrency": "EGP",
-          "price": "299.00",
+          "price": "400.00",
           "availability": "https://schema.org/InStock",
           "itemCondition": "https://schema.org/NewCondition",
           "shippingDetails": {
             "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": "0",
+              "currency": "EGP"
+            },
             "shippingDestination": {
               "@type": "DefinedRegion",
               "addressCountry": "EG"
@@ -127,7 +132,7 @@
             "name": "هل يتوفر الشحن والدفع عند الاستلام في مصر؟",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "نعم، يتوفر الشحن داخل مصر مع خيار الدفع عند الاستلام حسب المحافظة."
+              "text": "نعم، يتوفر الشحن داخل مصر مع خيار الدفع عند الاستلام. سعر المنتج 400 ج.م ويشمل تكلفة التوصيل."
             }
           }
         ]
@@ -440,17 +445,17 @@
             <div class="flex flex-wrap items-baseline gap-2">
               <span class="inline-flex items-center rounded-sm bg-price text-white text-sm font-bold px-2 py-0.5">-36%</span>
               <p class="text-2xl sm:text-3xl font-bold text-price leading-none">
-                <span class="js-price">299.00</span>
+                <span class="js-price">400.00</span>
                 <span class="text-base font-semibold text-[#0f1111]">ج.م</span>
               </p>
             </div>
             <p class="text-sm text-[#565959]">
               السعر قبل الخصم:
-              <span class="line-through"><span class="js-original-price">467.19</span> ج.م</span>
+              <span class="line-through"><span class="js-original-price">625.00</span> ج.م</span>
             </p>
             <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold bg-[#e7f5e7] text-stock">متوفر في المخزون</span>
           </div>
-          <p class="text-sm text-[#565959] mt-2 leading-6">يشمل الضريبة · موعد التوصيل: <span id="pageDeliveryText" class="js-delivery-text font-semibold text-[#0f1111]">اختر المحافظة لمعرفة موعد التوصيل</span></p>
+          <p class="text-sm text-[#565959] mt-2 leading-6">يشمل الضريبة والشحن · موعد التوصيل: <span id="pageDeliveryText" class="js-delivery-text font-semibold text-[#0f1111]">اختر المحافظة لمعرفة موعد التوصيل</span></p>
 
           <!-- Mobile quantity (buy box is desktop-only) -->
           <div class="md:hidden mt-4 p-3 rounded-lg border border-border bg-buybox space-y-2">
@@ -531,13 +536,13 @@
             <div class="flex flex-wrap items-baseline gap-2">
               <span class="inline-flex items-center rounded-sm bg-price text-white text-xs font-bold px-1.5 py-0.5">-36%</span>
               <p class="text-xl font-bold text-price leading-none">
-                <span class="js-price">299.00</span>
+                <span class="js-price">400.00</span>
                 <span class="text-sm font-normal text-[#0f1111]">ج.م</span>
               </p>
             </div>
             <p class="text-xs text-[#565959] mt-1">
               السعر قبل الخصم:
-              <span class="line-through"><span class="js-original-price">467.19</span> ج.م</span>
+              <span class="line-through"><span class="js-original-price">625.00</span> ج.م</span>
             </p>
             <p class="text-sm text-stock font-semibold mt-1">متوفر في المخزون</p>
           </div>
@@ -719,9 +724,9 @@
             <p class="font-semibold text-sm leading-5" id="cartProductName">Never Hold Back Gel</p>
             <p class="text-price font-bold mt-1">
               <span class="text-xs bg-price text-white rounded-sm px-1 ml-1">-36%</span>
-              <span class="js-price">299.00</span> ج.م
+              <span class="js-price">400.00</span> ج.م
             </p>
-            <p class="text-xs text-[#565959] line-through"><span class="js-original-price">467.19</span> ج.م</p>
+            <p class="text-xs text-[#565959] line-through"><span class="js-original-price">625.00</span> ج.م</p>
           </div>
         </div>
         <div class="flex items-center justify-between mt-3 text-sm">
@@ -810,13 +815,13 @@
           </div>
           <div class="flex justify-between gap-2">
             <span>الشحن</span>
-            <span id="orderShippingLabel" class="shrink-0 text-[#565959]">اختر المحافظة</span>
+            <span id="orderShippingLabel" class="shrink-0">مشمول في السعر</span>
           </div>
           <div class="flex justify-between gap-2 font-bold text-base border-t border-border pt-2">
             <span>السعر الإجمالي</span>
             <span class="text-price shrink-0"><span id="orderGrandTotal">0.00</span> ج.م</span>
           </div>
-          <p class="text-xs text-[#565959] font-normal">الدفع عند الاستلام · الإجمالي = سعر المنتج × الكمية + شحن المحافظة</p>
+          <p class="text-xs text-[#565959] font-normal">الدفع عند الاستلام · 400 ج.م تشمل الشحن · الإجمالي = السعر × الكمية</p>
         </div>
 
         <div id="formError" class="form-msg rounded-lg bg-red-50 text-price text-sm px-3 py-2 border border-red-200"></div>
@@ -834,9 +839,9 @@
     <div class="flex items-center justify-between gap-2 mb-2 px-0.5">
       <div class="flex items-baseline gap-1.5 min-w-0">
         <span class="text-[11px] bg-price text-white rounded-sm px-1 font-bold shrink-0">-36%</span>
-        <span class="text-price font-extrabold text-lg leading-none"><span class="js-price">299.00</span> <span class="text-xs font-semibold text-[#0f1111]">ج.م</span></span>
+        <span class="text-price font-extrabold text-lg leading-none"><span class="js-price">400.00</span> <span class="text-xs font-semibold text-[#0f1111]">ج.م</span></span>
       </div>
-      <span class="text-[11px] text-[#565959] line-through shrink-0"><span class="js-original-price">467.19</span> ج.م</span>
+      <span class="text-[11px] text-[#565959] line-through shrink-0"><span class="js-original-price">625.00</span> ج.م</span>
     </div>
     <div class="grid grid-cols-2 gap-2">
       <button type="button" class="add-cart tap-target rounded-full bg-yellow hover:bg-[#e7b630] text-[#0f1111] font-bold py-3 text-sm border border-[#a88734]/40">أضف إلى السلة</button>
@@ -855,10 +860,10 @@
      *    (Execute as: Me · Who has access: Anyone)
      * 3. Paste it between the quotes below, then hard-refresh this page
      * 4. Smoke test: open YOUR_URL?action=getConfig&source=amazon-pdp
-     *    — expect ok:true + price + shipping { المحافظة: fee }
+     *    — expect ok:true + price 400 (shipping included, fees are 0)
      *
      * Orders POST JSON (text/plain) to the same /exec endpoint as the other site.
-     * السعر الإجمالي = unitPrice × quantity + governorate shipping (server-authoritative).
+     * السعر الإجمالي = 400 × quantity (الشحن مشمول — server-authoritative).
      */
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyv42Ob87yf648qZcA4F2vOjxIVltVNnJjQNyEKPclaHRS5Nm9r53cOe5GWU3BOu0odRw/exec";
     /** Sheet notes tag so amazon-pdp orders are distinguishable from the other site. */
@@ -885,38 +890,10 @@
     const MAX_QTY = visitorStock;
 
     let cartQty = 0;
-    let unitPrice = 299;
-    let originalPrice = 467.19; // 299 after 36% off
+    let unitPrice = 400; // includes delivery
+    let originalPrice = 625; // 400 after 36% off
     const DISCOUNT_PERCENT = 36;
     let productName = "Never Hold Back Gel";
-
-    /** Same zone fallbacks as code.gs CONFIG (used until getConfig loads). */
-    const SHIPPING_CAIRO = 35;
-    const SHIPPING_ALEX = 45;
-    const SHIPPING_NEAR = 55;
-    const SHIPPING_FAR = 70;
-    const SHIPPING_CAIRO_GOVS = { "القاهرة": 1, "الجيزة": 1, "القليوبية": 1 };
-    const SHIPPING_ALEX_GOVS = { "الإسكندرية": 1 };
-    const SHIPPING_FAR_GOVS = {
-      "البحر الأحمر": 1, "الوادي الجديد": 1, "مطروح": 1,
-      "جنوب سيناء": 1, "شمال سيناء": 1, "أسوان": 1,
-    };
-    let shippingByGov = {};
-
-    function fallbackShippingFee(gov) {
-      if (!gov) return 0;
-      if (SHIPPING_CAIRO_GOVS[gov]) return SHIPPING_CAIRO;
-      if (SHIPPING_ALEX_GOVS[gov]) return SHIPPING_ALEX;
-      if (SHIPPING_FAR_GOVS[gov]) return SHIPPING_FAR;
-      return SHIPPING_NEAR;
-    }
-
-    function getShippingFee(gov) {
-      if (!gov) return 0;
-      const fromConfig = Number(shippingByGov[gov]);
-      if (!isNaN(fromConfig) && fromConfig > 0) return fromConfig;
-      return fallbackShippingFee(gov);
-    }
 
     function getSelectedProductQty() {
       return Math.max(
@@ -998,7 +975,6 @@
       const gov = $("#orderGovernorate").value.trim();
       const time = DELIVERY_BY_GOV[gov];
       const el = $("#deliveryEstimate");
-      const fee = gov ? getShippingFee(gov) : 0;
       const label = time
         ? time
         : "اختر المحافظة لمعرفة موعد التوصيل";
@@ -1008,10 +984,10 @@
       });
 
       if (gov && time) {
-        el.textContent = "وقت التوصيل المتوقع: " + time + " · الشحن: " + formatMoney(fee) + " ج.م";
+        el.textContent = "وقت التوصيل المتوقع: " + time + " · الشحن مشمول في السعر";
         el.classList.remove("hidden");
       } else if (gov) {
-        el.textContent = "الشحن: " + formatMoney(fee) + " ج.م";
+        el.textContent = "الشحن مشمول في السعر (400 ج.م)";
         el.classList.remove("hidden");
       } else {
         el.textContent = "";
@@ -1028,7 +1004,7 @@
     }
 
     function syncPriceUI() {
-      // Keep sale price at 299; original reflects 36% offer (Amazon style)
+      // Keep sale price at 400 (includes shipping); original reflects 36% offer
       originalPrice = Math.round((unitPrice / (1 - DISCOUNT_PERCENT / 100)) * 100) / 100;
       $$(".js-price").forEach((el) => (el.textContent = formatMoney(unitPrice)));
       $$(".js-original-price").forEach((el) => (el.textContent = formatMoney(originalPrice)));
@@ -1041,9 +1017,7 @@
       const qty = Math.max(cartQty, 0);
       const gov = $("#orderGovernorate") ? $("#orderGovernorate").value.trim() : "";
       const subtotal = unitPrice * qty;
-      const shippingFee = gov ? getShippingFee(gov) : 0;
-      const shipping = qty > 0 ? shippingFee : 0;
-      const total = subtotal + shipping;
+      const total = subtotal; // shipping included in the 400 unit price
 
       const subEl = $("#orderSubtotal");
       const shipEl = $("#orderShippingLabel");
@@ -1051,10 +1025,10 @@
       if (subEl) subEl.textContent = formatMoney(subtotal);
       if (shipEl) {
         if (!gov) {
-          shipEl.textContent = "اختر المحافظة";
-          shipEl.classList.add("text-[#565959]");
+          shipEl.textContent = "مشمول في السعر";
+          shipEl.classList.remove("text-[#565959]");
         } else {
-          shipEl.textContent = formatMoney(shippingFee) + " ج.م";
+          shipEl.textContent = "مجاني (مشمول)";
           shipEl.classList.remove("text-[#565959]");
         }
       }
@@ -1139,9 +1113,6 @@
           if (data.price > 0) unitPrice = Number(data.price);
           if (data.originalPrice > 0) originalPrice = Number(data.originalPrice);
           if (data.productName) productName = String(data.productName);
-          if (data.shipping && typeof data.shipping === "object") {
-            shippingByGov = data.shipping;
-          }
           syncPriceUI();
           updateDeliveryEstimate();
         }
